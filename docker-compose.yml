@@ -32,7 +32,22 @@ services:
       - DB_NAME=${DB_NAME}
     volumes:
       - ./backend:/usr/src/app
+      - /usr/src/app/node_modules  # Evita conflicto de dependencias en backend
+    command: ["npm", "run", "dev"]  # Iniciar con hot-reload
 
+  frontend:
+    build: ./frontend
+    container_name: pwa_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # Evita conflictos de dependencias
+    depends_on:
+      - backend
+    command: ["npm", "run", "dev"]  # Asegurar hot-reload en Vite
 
 volumes:
   db_data:
