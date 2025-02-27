@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db: 
+    image: postgres:15
+    container_name: pwa_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./backend/sql:/docker-entrypoint-initdb.d/
+  
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pwa_backend
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    volumes:
+      - ./backend:/usr/src/app
+
+
+volumes:
+  db_data:
