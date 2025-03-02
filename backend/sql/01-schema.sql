@@ -6,7 +6,13 @@ CREATE TABLE IF NOT EXISTS usuario(
     password VARCHAR(100) NOT NULL,
     fecha_registro TIMESTAMP DEFAULT NOW(),
     avatar VARCHAR(100) DEFAULT 'default.png',
-    rol VARCHAR(20) DEFAULT 'user'
+    rol VARCHAR(20) DEFAULT 'user',
+    peso DECIMAL(6,2) CHECK (peso >= 0), -- Evitar valores negativos
+    altura DECIMAL(6,2) CHECK (altura >= 0), -- Evitar valores negativos
+    edad INT CHECK (edad >= 0), -- Evitar valores negativos
+    sexo VARCHAR(1) CHECK (sexo IN ('M', 'F')), -- Solo permitir M o F
+    CONSTRAINT check_rol CHECK (rol IN ('user', 'admin'))
+    
 );
 
 -- == DIETA == --
