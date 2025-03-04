@@ -5,7 +5,7 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<AuthPage />} />
+        <Route path="/:type" element={<AuthPage />} />
         <Route path="/" element={<h1 className="text-center mt-10">INICIO</h1>} />
       </Routes>
     </Router>
