@@ -45,16 +45,6 @@ const AuthPage = () => {
             <h5 className="text-white m-0">L</h5>
           </div>
         </div>
-
-        {/* Botón para cambiar entre Login y Registro */}
-        <div className="text-center mt-3">
-          <button
-            className="btn btn-link text-white"
-            onClick={() => navigate(type === "login" ? "/register" : "/login")}
-          >
-            {type === "login" ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
-          </button>
-        </div>
       </div>
     </div>
   );
