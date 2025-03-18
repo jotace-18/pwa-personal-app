@@ -22,6 +22,7 @@ const AlimentosForm = () => {
   const [nombreAlimento, setNombreAlimento] = useState("");
   const [tipo, setTipo] = useState("");
   const [supermercado, setSupermercado] = useState("");
+  const [marca, setMarca] = useState("");
   const [precio, setPrecio] = useState<number | string>("");
   const [calorias, setCalorias] = useState<number | string>("");
 
@@ -54,6 +55,7 @@ const AlimentosForm = () => {
       nombre_alimento: nombreAlimento,
       tipo,
       supermercado,
+      marca,
       precio: Number(precio),
       calorias: Number(calorias),
       nutrientes: nutrientNames.map((nutrient) => ({
@@ -107,6 +109,15 @@ const AlimentosForm = () => {
           value={supermercado}
           onChange={(e) => setSupermercado(e.target.value)}
           required
+        />
+      </div>
+      <div>
+        <label>Marca:</label>
+        <input
+          type="text"
+          value={marca}
+          onChange={(e) => setMarca(e.target.value)}
+          // required si quieres hacerlo obligatorio
         />
       </div>
       <div>

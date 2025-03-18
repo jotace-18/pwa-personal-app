@@ -8,6 +8,7 @@ export const createAlimento = async (data) => {
     const newAlimento = await Alimento.create({
       nombre_alimento: data.nombre_alimento,
       tipo: data.tipo,
+      marca: data.marca,
       supermercado: data.supermercado,
       precio: data.precio,
       calorias: data.calorias,
@@ -51,3 +52,4 @@ export const getAllAlimentos = async () => {
     throw error;
   }
 };
+

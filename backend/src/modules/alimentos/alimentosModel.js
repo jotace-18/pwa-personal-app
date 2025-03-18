@@ -19,6 +19,12 @@ const Alimento = sequelize.define('Alimento', {
     type: DataTypes.STRING(100),
     allowNull: false,
   },
+  // Nueva columna
+  marca: {
+    type: DataTypes.STRING(100),
+    allowNull: true, // o false si quieres que sea obligatorio
+    // defaultValue: 'Desconocida' // opcional
+  },
   precio: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
