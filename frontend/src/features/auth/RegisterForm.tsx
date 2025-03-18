@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import axios from "axios";
 
 const RegisterForm = () => {
     const [username, setUsername] = useState("");
@@ -8,6 +9,8 @@ const RegisterForm = () => {
     const [password2, setPassword2] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [passwordsMatch, setPasswordsMatch] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUsername(e.target.value);
@@ -31,7 +34,7 @@ const RegisterForm = () => {
         setShowPassword(!showPassword);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (passwordsMatch) {
             const userData = {
@@ -39,10 +42,21 @@ const RegisterForm = () => {
                 email,
                 password,
             };
-            // Handle form submission
-            console.log("Form submitted", userData);
+            try {
+                const response = await axios.post("http://localhost:4000/api/usuarios/register", userData);
+                setSuccessMessage(response.data.message || "Registro exitoso. Por favor, verifica tu correo electrónico.");
+                setErrorMessage("");
+            } catch (error) {
+                if (axios.isAxiosError(error) && error.response) {
+                    setErrorMessage(error.response.data.message || "Error al registrar. Por favor, intenta nuevamente.");
+                } else {
+                    setErrorMessage("Error al registrar. Por favor, intenta nuevamente.");
+                }
+                setSuccessMessage("");
+            }
         } else {
-            console.log("Passwords do not match");
+            setErrorMessage("Las contraseñas no coinciden.");
+            setSuccessMessage("");
         }
     };
 
@@ -112,6 +126,12 @@ const RegisterForm = () => {
                 </div>
                 {!passwordsMatch && (
                     <div className="text-danger mt-2">Las contraseñas no coinciden</div>
+                )}
+                {errorMessage && (
+                    <div className="text-danger mt-2">{errorMessage}</div>
+                )}
+                {successMessage && (
+                    <div className="text-success mt-2">{successMessage}</div>
                 )}
             </div>
             <div className="d-flex flex-column align-items-center gap-2 mt-3">

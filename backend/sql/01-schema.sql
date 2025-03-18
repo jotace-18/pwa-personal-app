@@ -1,3 +1,5 @@
+
+
 -- == USUARIOS == --
 CREATE TABLE IF NOT EXISTS usuario(
     id_user SERIAL PRIMARY KEY,
@@ -42,7 +44,7 @@ CREATE TABLE IF NOT EXISTS alimento(
 );
 
 -- Agregar última actualización después de la creación de la tabla
-ALTER TABLE alimento ADD COLUMN ultima_actualizacion TIMESTAMP DEFAULT NOW();
+ALTER TABLE alimento ADD ultima_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
 
 -- == NUTRIENTE == --
@@ -126,15 +128,10 @@ CREATE TABLE IF NOT EXISTS lista_compra_alimento(
 
 
 -- == TRIGGERS == --
-CREATE OR REPLACE FUNCTION update_ultima_actualizacion()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.ultima_actualizacion = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_update_ultima_actualizacion
+CREATE OR REPLACE TRIGGER trigger_update_ultima_actualizacion
 BEFORE UPDATE ON alimento
 FOR EACH ROW
-EXECUTE FUNCTION update_ultima_actualizacion();
+BEGIN
+    :NEW.ultima_actualizacion := SYSDATE;
+END;
+/

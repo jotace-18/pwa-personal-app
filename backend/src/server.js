@@ -1,12 +1,15 @@
-import express from "express";
+import app from './app.js';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const app = express();
-const PORT = process.env.PORT || 4000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-app.get("/", (req, res) => {
-  res.send("¡Servidor backend funcionando!");
-});
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo a tope en http://localhost:${PORT}`);
+const port = process.env.PORT || 4000;
+
+app.listen(port, () => {
+    console.log(`Servidor corriendo en el puerto ${port}`);
 });
