@@ -4,8 +4,7 @@ import jwt from 'jsonwebtoken';
 import { jwtSecret } from '../../config/env.js';
 
 export const register = async (req, res) => {
-    const { username, email, password } = req.body;
-
+    const { username, email, password } = req.body; // username viene del frontend
     try {
         // Verificar si el usuario ya existe
         const existingUser = await Usuario.findOne({ where: { email } });
@@ -16,18 +15,19 @@ export const register = async (req, res) => {
         // Encriptar la contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Crear un nuevo usuario
+        // Crear un nuevo usuario (mapeando username a nombre)
         const newUser = await Usuario.create({
-            username,
+            nombre: username,
             email,
             password: hashedPassword,
         });
 
-        // Crear un token de autenticación
-        const token = jwt.sign({ userId: newUser.id }, jwtSecret, { expiresIn: '1h' });
+        // Crear un token de autenticación usando el id_user
+        const token = jwt.sign({ userId: newUser.id_user }, jwtSecret, { expiresIn: '1h' });
 
         res.status(201).json({ message: 'Registro exitoso.', token });
     } catch (error) {
+        console.error("Error en register:", error);
         res.status(500).json({ message: 'Error al registrar. Por favor, intenta nuevamente.' });
     }
 };

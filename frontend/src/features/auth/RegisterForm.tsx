@@ -43,7 +43,7 @@ const RegisterForm = () => {
                 password,
             };
             try {
-                const response = await axios.post("http://localhost:4000/api/usuarios/register", userData);
+                const response = await axios.post("http://localhost:4000/api/usuario/register", userData);
                 setSuccessMessage(response.data.message || "Registro exitoso. Por favor, verifica tu correo electrónico.");
                 setErrorMessage("");
             } catch (error) {
