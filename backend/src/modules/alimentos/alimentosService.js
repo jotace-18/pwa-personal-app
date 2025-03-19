@@ -53,3 +53,21 @@ export const getAllAlimentos = async () => {
   }
 };
 
+export const getAlimentoByNameService = async (nombreAlimento) => {
+  try {
+    return await Alimento.findOne({
+      where: { nombre_alimento: nombreAlimento },
+      include: [
+        {
+          model: Nutriente,
+          attributes: ['nombre_nutriente'],  // Lo que quieras de la tabla nutriente
+          through: {
+            attributes: ['cantidad'],        // Trae la 'cantidad' de la tabla intermedia
+          },
+        },
+      ],
+    });
+  } catch (error) {
+    throw error;
+  }
+};

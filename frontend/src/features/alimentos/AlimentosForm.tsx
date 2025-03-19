@@ -55,7 +55,7 @@ const AlimentosForm = () => {
       nombre_alimento: nombreAlimento,
       tipo,
       supermercado,
-      marca,
+      marca, // Se agregó la marca aquí
       precio: Number(precio),
       calorias: Number(calorias),
       nutrientes: nutrientNames.map((nutrient) => ({
@@ -73,6 +73,7 @@ const AlimentosForm = () => {
       setNombreAlimento("");
       setTipo("");
       setSupermercado("");
+      setMarca(""); // Limpiar el campo de marca
       setPrecio("");
       setCalorias("");
       setNutrients(initialNutrients);

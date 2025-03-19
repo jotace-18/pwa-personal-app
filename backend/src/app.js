@@ -7,10 +7,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
 
+// **Importamos las asociaciones** para que Sequelize sepa cómo relacionar los modelos
+import { Alimento, Nutriente, AlimentoNutriente } from '../src/modules/alimentos/associations.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Cargar variables de entorno desde el archivo .env en el nivel superior
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
