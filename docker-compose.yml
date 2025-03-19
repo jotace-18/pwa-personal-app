@@ -1,10 +1,13 @@
 version: '3.8'
 
 services:
-  db: 
+  # Servicio de base de datos local (opcional)
+  # Se levanta siempre, pero tu backend solo lo usará si DB_HOST=db
+  db:
     image: postgres:15
     container_name: pwa_db
     restart: unless-stopped
+    # Solo se usan estas variables si deseas conectar localmente
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -14,13 +17,14 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./backend/sql:/docker-entrypoint-initdb.d/
-  
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: pwa_backend
     restart: unless-stopped
+    # Si DB_HOST=db, depende de db; si usas Neon, en la práctica la conexión será remota
     depends_on:
       - db
     ports:
@@ -30,8 +34,10 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
       - JWT_SECRET=${JWT_SECRET}
       - PORT=${PORT}
+
     volumes:
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules  # Evita conflicto de dependencias en backend
