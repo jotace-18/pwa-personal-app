@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/ui/Layout";
 import HomePage from "./pages/HomePage";
@@ -6,8 +7,10 @@ import AlimentosForm from "./features/alimentos/AlimentosForm";
 import AlimentosList from "./features/alimentos/AlimentosList";
 import Planificacion from "./pages/planificacion";
 import MisDietas from "./pages/MisDietas";
+import AddDieta from "./pages/AddDieta";
+import EditDietaIndex from "./pages/editDieta/index";
 
-const App = () => {
+const App: React.FC = () => {
   return (
     <Router>
       <Routes>
@@ -22,7 +25,14 @@ const App = () => {
           <Route path=":type" element={<AuthPage />} />
           <Route path="planificacion" element={<Planificacion />} />
           <Route path="mis-dietas" element={<MisDietas />} />
+          <Route path="add-dieta" element={<AddDieta />} />
         </Route>
+
+        {/* Otras rutas */}
+        <Route path="/edit-dieta/*" element={<EditDietaIndex />} />
+
+        {/* Ruta fallback */}
+        <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </Router>
   );

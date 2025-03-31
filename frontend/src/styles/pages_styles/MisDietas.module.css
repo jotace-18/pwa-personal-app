@@ -3,3 +3,164 @@
     justify-content: space-between;
     margin: 1rem;
 }
+
+.MisDietas {
+    padding: 1rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.dietasContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.noDietas {
+    text-align: center;
+    width: 100%;
+}
+
+.dietaCard {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.dietaCard.active {
+    background-color: #e0ffe0; /* Fondo verdoso para activas */
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.cardHeader h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.cardBody {
+    flex-grow: 1;
+}
+
+.cardBody p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+.cardFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.button,
+.buttonDelete,
+.buttonEdit {
+    cursor: pointer;
+    border: none;
+    background-color: #0070f3;
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.button:hover,
+.buttonDelete:hover,
+.buttonEdit:hover {
+    background-color: #005bb5;
+    transform: scale(1.05);
+}
+
+.buttonDelete,
+.buttonEdit {
+    background-color: transparent;
+    color: #0070f3;
+    padding: 0.2rem;
+    font-size: 1.2rem;
+}
+
+.buttonDelete:hover,
+.buttonEdit:hover {
+    background-color: rgba(0, 112, 243, 0.1);
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.modal p {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.modalButtons {
+    display: flex;
+    justify-content: space-around;
+}
+
+.modalConfirm,
+.modalCancel {
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.modalConfirm {
+    background-color: #d9534f;
+    color: #fff;
+}
+
+.modalCancel {
+    background-color: #5bc0de;
+    color: #fff;
+}
+
+.modalConfirm:hover {
+    background-color: #c9302c;
+}
+
+.modalCancel:hover {
+    background-color: #31b0d5;
+}
