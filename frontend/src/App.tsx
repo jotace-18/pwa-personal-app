@@ -9,6 +9,7 @@ import Planificacion from "./pages/planificacion";
 import MisDietas from "./pages/MisDietas";
 import AddDieta from "./pages/AddDieta";
 import EditDietaIndex from "./pages/editDieta/index";
+import MisRecetas from "./pages/Recetas/MisRecetas";
 
 const App: React.FC = () => {
   return (
@@ -26,6 +27,8 @@ const App: React.FC = () => {
           <Route path="planificacion" element={<Planificacion />} />
           <Route path="mis-dietas" element={<MisDietas />} />
           <Route path="add-dieta" element={<AddDieta />} />
+          <Route path="/edit-dieta/*" element={<EditDietaIndex />} />
+          <Route path="/recetas" element={<MisRecetas />} />
         </Route>
 
         {/* Otras rutas */}
