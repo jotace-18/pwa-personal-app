@@ -20,16 +20,12 @@ const MisRecetas: React.FC = () => {
   const fetchRecetas = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:4000/api/receta");
-      // Si la respuesta es 404, asumimos que no hay recetas y devolvemos un array vacío
-      if (response.status === 404) {
-        setRecetas([]);
-        return;
-      }
+      const response = await fetch("http://localhost:4000/api/recetas");
       if (!response.ok) {
         throw new Error("Error al obtener las recetas");
       }
       const data: Receta[] = await response.json();
+      console.log("Recetas recibidas:", data); // Verifica en consola lo que devuelve el endpoint
       setRecetas(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -46,6 +42,22 @@ const MisRecetas: React.FC = () => {
     fetchRecetas();
   }, []);
 
+  const handleDelete = async (id: number) => {
+    if(!window.confirm("¿Estás seguro de que deseas eliminar esta receta?")) return;
+    try {
+      const response = await fetch(`http://localhost:4000/api/recetas/${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok){
+        fetchRecetas()
+      } else {
+        alert("Error al eliminar la receta");
+      }
+    } catch (error){
+      console.error("Error al eliminar la dieta:", error); 
+    }
+  };
+
   return (
     <div className={styles.MisRecetas}>
       <div className={styles.header}>
@@ -59,7 +71,6 @@ const MisRecetas: React.FC = () => {
         Crear receta
       </button>
 
-
       {loading && <p className={styles.message}>Cargando recetas...</p>}
       {error && <p className={styles.error}>Error al obtener las recetas</p>}
       {!loading && !error && recetas.length === 0 && (
@@ -67,16 +78,22 @@ const MisRecetas: React.FC = () => {
       )}
 
       <div className={styles.recetasContainer}>
-        {!loading && !error && recetas.map((receta) => (
-          <div key={receta.id_receta} className={styles.recetaCard}>
-            <div className={styles.cardHeader}>
-              <button className={styles.editButton}>✏️</button>
-              <button className={styles.deleteButton}>🗑️</button>
+        {!loading &&
+          !error &&
+          recetas.map((receta) => (
+            <div key={receta.id_receta} className={styles.recetaCard}>
+              <div className={styles.cardHeader}>
+                <button 
+                className={styles.editButton}
+                onClick={() => navigate(`/recetas/editar/${receta.id_receta}`)}>✏️</button>
+                <button 
+                className={styles.deleteButton}
+                onClick={() => handleDelete(receta.id_receta)}>🗑️</button>
+              </div>
+              <h3>{receta.nombre}</h3>
+              <p>{receta.descripcion}</p>
             </div>
-            <h3>{receta.nombre}</h3>
-            <p>{receta.descripcion}</p>
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );

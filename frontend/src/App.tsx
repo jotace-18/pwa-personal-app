@@ -11,6 +11,7 @@ import AddDieta from "./pages/AddDieta";
 import EditDietaIndex from "./pages/editDieta/index";
 import MisRecetas from "./pages/Recetas/MisRecetas";
 import AddRecetas from "./pages/Recetas/AddRecetas";
+import EditarRecetas from "./pages/Recetas/EditarRecetas"
 
 const App: React.FC = () => {
   return (
@@ -35,6 +36,7 @@ const App: React.FC = () => {
         {/* Otras rutas */}
         <Route path="/edit-dieta/*" element={<EditDietaIndex />} />
         <Route path="/recetas/crear" element={<AddRecetas />} />
+        <Route path="/recetas/editar/:id" element={<EditarRecetas />} />
 
         {/* Ruta fallback */}
         <Route path="*" element={<div>404 Not Found</div>} />

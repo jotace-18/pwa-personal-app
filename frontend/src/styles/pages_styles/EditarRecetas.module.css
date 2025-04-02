@@ -1,0 +1,210 @@
+.home {
+  display: flex;
+  justify-content: space-between;
+  margin: 1rem;
+}
+
+/* Contenedor principal de la página (similar a AddRecetas) */
+.AddRecetas {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: Arial, sans-serif;
+}
+
+/* Estructura de dos columnas para formulario y estadísticas */
+.twoColumns {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* Estilo para el contenedor del formulario */
+.formContainer {
+  flex: 1;
+  min-width: 300px;
+  background-color: #f9f9f9;
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+/* Grupos de formularios */
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formGroup label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Ajuste para textarea */
+textarea {
+  resize: vertical;
+}
+
+/* Estilo para la búsqueda de alimentos */
+.searchInput {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.searchResults {
+  list-style: none;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  max-height: 150px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+}
+
+.searchResults li {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.searchResults li:hover {
+  background-color: #eee;
+}
+
+/* Alimento seleccionado y controles para agregar ingrediente */
+.selectedAlimento {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.gramosInput {
+  width: 80px;
+  padding: 0.25rem;
+}
+
+.addButton,
+.discardButton {
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.addButton:hover {
+  background-color: #45a049;
+}
+
+.discardButton {
+  background-color: #f44336;
+}
+
+.discardButton:hover {
+  background-color: #e31b0c;
+}
+
+/* Lista de ingredientes agregados */
+.ingredientList {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+/* Grupo de botones al final del formulario */
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.saveButton {
+  flex: 1;
+  background-color: #2196f3;
+  color: #fff;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.saveButton:hover {
+  background-color: #1976d2;
+}
+
+.cancelButton {
+  flex: 1;
+  background-color: #9e9e9e;
+  color: #fff;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.cancelButton:hover {
+  background-color: #757575;
+}
+
+/* Contenedor de estadísticas */
+.statsContainer {
+  flex: 1;
+  min-width: 300px;
+  background-color: #fff;
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.overallStats {
+  margin-bottom: 1rem;
+}
+
+.overallGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.ingredientStat {
+  margin-bottom: 1rem;
+  border-top: 1px solid #ccc;
+  padding-top: 0.5rem;
+}
+
+.toggleButton {
+  background-color: transparent;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.details {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f1f1f1;
+  border-radius: 4px;
+}
+
+.nutrientStat {
+  display: flex;
+  justify-content: space-between;
+}

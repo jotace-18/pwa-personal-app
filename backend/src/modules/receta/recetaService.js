@@ -20,6 +20,23 @@ export const getAllRecetas = async () => {
   }
 };
 
+export const getRecetaById = async (id) => {
+  try {
+    const receta = await Receta.findByPk(id, {
+      include: [
+        {
+          model: Alimento,
+          through: { attributes: ["cantidad", "unidad"] },
+        },
+      ],
+    });
+    return receta;
+  } catch (error) {
+    console.error('Error al obtener la receta:', error);
+    throw new Error('No se pudo obtener la receta');
+  }
+};
+
 export const addReceta = async (recetaData, ingredientes) => {
   try {
     // Crea la receta principal
@@ -55,6 +72,18 @@ export const addReceta = async (recetaData, ingredientes) => {
     return nuevaReceta;
   } catch (error) {
     console.error("Error al crear la receta:", error);
+    throw error;
+  }
+};
+
+export const deleteReceta = async (id) => {
+  try {
+    const result = await Receta.destroy({
+      where: { id_receta: id }
+    });
+    return result;
+  } catch (error) {
+    console.error("Error al eliminar la receta:", error);
     throw error;
   }
 };
