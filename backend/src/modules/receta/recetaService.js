@@ -1,5 +1,5 @@
 import Receta from './recetaModel.js';
-import RecetaAlimento from '../receta_alimentos/recetaAlimentoModel.js';
+import RecetaAlimento from '../receta_alimento/receta_alimentoModel.js';
 import Alimento from '../alimentos/alimentosModel.js';
 
 export const getAllRecetas = async () => {

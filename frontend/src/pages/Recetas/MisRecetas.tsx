@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "../../styles/pages_styles/MisRecetas.module.css";
+import { useNavigate } from "react-router-dom";
 
 interface Receta {
   id_receta: number;
@@ -14,11 +15,17 @@ const MisRecetas: React.FC = () => {
   const [recetas, setRecetas] = useState<Receta[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchRecetas = async () => {
     try {
       setLoading(true);
       const response = await fetch("http://localhost:4000/api/receta");
+      // Si la respuesta es 404, asumimos que no hay recetas y devolvemos un array vacío
+      if (response.status === 404) {
+        setRecetas([]);
+        return;
+      }
       if (!response.ok) {
         throw new Error("Error al obtener las recetas");
       }
@@ -45,7 +52,13 @@ const MisRecetas: React.FC = () => {
         <h2>Bienvenido, User</h2>
         <p>Semana, Día del mes, Año</p>
       </div>
-      <button className={styles.createButton}>Crear receta</button>
+      <button
+        className={styles.createButton}
+        onClick={() => navigate("/recetas/crear")}
+      >
+        Crear receta
+      </button>
+
 
       {loading && <p className={styles.message}>Cargando recetas...</p>}
       {error && <p className={styles.error}>Error al obtener las recetas</p>}
