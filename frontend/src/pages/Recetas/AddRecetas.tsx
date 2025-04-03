@@ -21,7 +21,7 @@ const AddRecetas: React.FC = () => {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [instrucciones, setInstrucciones] = useState("");
-  const [tiempoPreparacion, setTiempoPreparacion] = useState("");
+  const [tiempo_preparacion, setTiempo_preparacion] = useState("");
   const user_id = 1; // Valor fijo
 
   // BÚSQUEDA Y SELECCIÓN DE ALIMENTO PARA INGREDIENTE
@@ -101,7 +101,7 @@ const AddRecetas: React.FC = () => {
       nombre,
       descripcion,
       instrucciones,
-      tiempoPreparacion,
+      tiempo_preparacion,
       user_id,
       ingredientes: ingredientesPayload  // usa la versión transformada
     };
@@ -177,12 +177,12 @@ const AddRecetas: React.FC = () => {
               ></textarea>
             </div>
             <div className={styles.formGroup}>
-              <label htmlFor="tiempoPreparacion">Tiempo de Preparación:</label>
+              <label htmlFor="tiempo_preparacion">Tiempo de Preparación:</label>
               <input
                 type="text"
-                id="tiempoPreparacion"
-                value={tiempoPreparacion}
-                onChange={(e) => setTiempoPreparacion(e.target.value)}
+                id="tiempo_preparacion"
+                value={tiempo_preparacion}
+                onChange={(e) => setTiempo_preparacion(e.target.value)}
                 required
               />
             </div>
