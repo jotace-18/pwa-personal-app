@@ -10,7 +10,7 @@ const Header: React.FC = () => {
                 <Link to="/">Mi casa</Link>
                 <Link to="/gym">Gym</Link>
                 <Link to="/super">Super</Link>
-                <Link to="/despensa">Despensa</Link>
+                <Link to="/alimentos-list">Despensa</Link>
                 <Link to="/recetas">Recetas</Link>
                 <Link to="/cartera">Cartera</Link>
                 <Link to="/yo">Yo</Link> 

@@ -1,12 +1,13 @@
 import { useState } from "react";
 import axios from "axios";
+import styles from "../../styles/pages_styles/AlimentosForm.module.css";
 
-// Lista fija de nutrientes
+// Lista fija de nutrientes (reordenados: "Hidratos de carbono" justo antes de "Azúcares")
 const nutrientNames = [
   "Grasas",
   "Grasas Saturadas",
-  "Azúcares",
   "Hidratos de carbono",
+  "Azúcares",
   "Fibra",
   "Proteínas",
   "Sal",
@@ -26,24 +27,19 @@ const AlimentosForm = () => {
   const [precio, setPrecio] = useState<number | string>("");
   const [calorias, setCalorias] = useState<number | string>("");
 
-  // Guardamos los valores de cada nutriente (clave: nombre, valor: cantidad)
   const [nutrients, setNutrients] = useState<{ [key: string]: string }>(initialNutrients);
-
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Maneja el cambio en el valor de un nutriente
+  // Maneja el cambio de valor en cada nutriente
   const handleNutrientChange = (nutrient: string, value: string) => {
-    setNutrients({
-      ...nutrients,
-      [nutrient]: value,
-    });
+    setNutrients({ ...nutrients, [nutrient]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Verificar que se haya completado la información de todos los nutrientes
+    // Validación: asegurar que se completen todos los nutrientes
     for (const nutrient of nutrientNames) {
       if (!nutrients[nutrient].trim()) {
         setErrorMessage(`Debe completarse la información para ${nutrient}.`);
@@ -55,12 +51,12 @@ const AlimentosForm = () => {
       nombre_alimento: nombreAlimento,
       tipo,
       supermercado,
-      marca, // Se agregó la marca aquí
+      marca,
       precio: Number(precio),
       calorias: Number(calorias),
       nutrientes: nutrientNames.map((nutrient) => ({
         nombre_nutriente: nutrient,
-        unidad: "g", // Unidad fija en gramos
+        unidad: "g",
         cantidad: Number(nutrients[nutrient]),
       })),
     };
@@ -73,13 +69,15 @@ const AlimentosForm = () => {
       setNombreAlimento("");
       setTipo("");
       setSupermercado("");
-      setMarca(""); // Limpiar el campo de marca
+      setMarca("");
       setPrecio("");
       setCalorias("");
       setNutrients(initialNutrients);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        setErrorMessage(error.response?.data.message || "Error al crear el alimento. Inténtalo nuevamente.");
+        setErrorMessage(
+          error.response?.data.message || "Error al crear el alimento. Inténtalo nuevamente."
+        );
       } else {
         setErrorMessage("Error al crear el alimento. Inténtalo nuevamente.");
       }
@@ -88,76 +86,88 @@ const AlimentosForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: "600px", margin: "0 auto" }}>
-      <h2>Crear Alimento</h2>
-      <div>
-        <label>Nombre del Alimento:</label>
+    <form onSubmit={handleSubmit} className={styles.formContainer}>
+      <h2 className={styles.title}>Crear Alimento</h2>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Nombre del Alimento:</label>
         <input
           type="text"
           value={nombreAlimento}
           onChange={(e) => setNombreAlimento(e.target.value)}
           required
+          className={styles.input}
         />
       </div>
-      <div>
-        <label>Tipo:</label>
-        <input type="text" value={tipo} onChange={(e) => setTipo(e.target.value)} required />
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Tipo:</label>
+        <input type="text" value={tipo} onChange={(e) => setTipo(e.target.value)} required className={styles.input} />
       </div>
-      <div>
-        <label>Supermercado:</label>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Supermercado:</label>
         <input
           type="text"
           value={supermercado}
           onChange={(e) => setSupermercado(e.target.value)}
           required
+          className={styles.input}
         />
       </div>
-      <div>
-        <label>Marca:</label>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Marca:</label>
         <input
           type="text"
           value={marca}
           onChange={(e) => setMarca(e.target.value)}
-          // required si quieres hacerlo obligatorio
+          className={styles.input}
         />
       </div>
-      <div>
-        <label>Precio:</label>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Precio:</label>
         <input
           type="number"
           step="0.01"
           value={precio}
           onChange={(e) => setPrecio(e.target.value)}
           required
+          className={styles.input}
         />
       </div>
-      <div>
-        <label>Calorías:</label>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Calorías:</label>
         <input
           type="number"
           value={calorias}
           onChange={(e) => setCalorias(e.target.value)}
           required
+          className={styles.input}
         />
       </div>
 
-      <h3>Nutrientes (en gramos)</h3>
+      <h3 className={styles.subtitle}>Nutrientes (en gramos)</h3>
       {nutrientNames.map((nutrient) => (
-        <div key={nutrient} style={{ marginBottom: "10px" }}>
-          <label>{nutrient}:</label>
+        <div key={nutrient} className={styles.nutrientGroup}>
+          <label className={styles.label}>
+            {nutrient === "Grasas Saturadas"
+              ? "De las cuales saturadas"
+              : nutrient === "Azúcares"
+              ? "De las cuales azúcares"
+              : nutrient}
+            :
+          </label>
           <input
             type="number"
             step="0.01"
             value={nutrients[nutrient]}
             onChange={(e) => handleNutrientChange(nutrient, e.target.value)}
             required
+            className={styles.input}
           />
         </div>
       ))}
 
-      <button type="submit">Crear Alimento</button>
-      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
-      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+      <button type="submit" className={styles.button}>Crear Alimento</button>
+      {successMessage && <p className={styles.success}>{successMessage}</p>}
+      {errorMessage && <p className={styles.error}>{errorMessage}</p>}
     </form>
   );
 };

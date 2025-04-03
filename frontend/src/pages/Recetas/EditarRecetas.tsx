@@ -9,9 +9,13 @@ interface AlimentoData {
   nutrientes: { nombre_nutriente: string; cantidad: number }[];
 }
 
-export interface IngredienteItem {
-  alimento: AlimentoData;
-  gramos: number;
+interface IngredienteItem {
+  id_alimento: number;
+  nombre_alimento: string;
+  calorias: number;
+  nutrientes: { nombre_nutriente: string; cantidad: number }[];
+  cantidad: number;
+  unidad: string;
 }
 
 interface IngredienteFetched {
@@ -51,7 +55,7 @@ const EditarRecetas: React.FC = () => {
   const [ingredientes, setIngredientes] = useState<IngredienteItem[]>([]);
   const [expanded, setExpanded] = useState<number[]>([]);
 
-  // Al montar: obtener todos los alimentos
+  // Obtener todos los alimentos
   useEffect(() => {
     fetch("http://localhost:4000/api/alimentos")
       .then((res) => res.json())
@@ -59,7 +63,7 @@ const EditarRecetas: React.FC = () => {
       .catch((err) => console.error("Error fetching alimentos:", err));
   }, []);
 
-  // Al montar: obtener la receta a editar
+  // Obtener la receta a editar
   useEffect(() => {
     if (id) {
       fetch(`http://localhost:4000/api/recetas/${id}`)
@@ -69,20 +73,36 @@ const EditarRecetas: React.FC = () => {
           setDescripcion(data.descripcion);
           setInstrucciones(data.instrucciones);
           setTiempoPreparacion(data.tiempo_preparacion);
-          // Transformamos ingredientes con el tipo definido
           if (data.ingredientes) {
             const ingredientesTransformados: IngredienteItem[] = data.ingredientes.map(
               (ing: IngredienteFetched) => ({
-                alimento: {
-                  id_alimento: ing.id_alimento,
-                  nombre_alimento: ing.nombre_alimento,
-                  calorias: ing.calorias,
-                  nutrientes: ing.nutrientes,
-                },
-                gramos: ing.cantidad,
+                id_alimento: ing.id_alimento,
+                nombre_alimento: ing.nombre_alimento,
+                calorias: ing.calorias,
+                nutrientes: ing.nutrientes, // Puede venir vacío
+                cantidad: ing.cantidad,
+                unidad: ing.unidad,
               })
             );
-            setIngredientes(ingredientesTransformados);
+            // Actualiza cada ingrediente que no tenga nutrientes consultando el endpoint de alimentos
+            Promise.all(
+              ingredientesTransformados.map(async (ing) => {
+                if (!ing.nutrientes || ing.nutrientes.length === 0) {
+                  // Se busca obtener información completa del alimento
+                  try {
+                    const res = await fetch(
+                      `http://localhost:4000/api/alimentos/${encodeURIComponent(ing.nombre_alimento)}`
+                    );
+                    const dataAlimento: AlimentoData = await res.json();
+                    return { ...ing, nutrientes: dataAlimento.nutrientes || [] };
+                  } catch (error) {
+                    console.error("Error fetching alimento details for", ing.nombre_alimento, error);
+                    return ing;
+                  }
+                }
+                return ing;
+              })
+            ).then((updatedIngredientes) => setIngredientes(updatedIngredientes));
           }
         })
         .catch((err) => console.error("Error fetching receta:", err));
@@ -118,7 +138,14 @@ const EditarRecetas: React.FC = () => {
     if (selectedAlimento && gramosInput !== "" && Number(gramosInput) > 0) {
       setIngredientes([
         ...ingredientes,
-        { alimento: selectedAlimento, gramos: Number(gramosInput) },
+        {
+          id_alimento: selectedAlimento.id_alimento,
+          nombre_alimento: selectedAlimento.nombre_alimento,
+          calorias: selectedAlimento.calorias,
+          nutrientes: selectedAlimento.nutrientes,
+          cantidad: Number(gramosInput),
+          unidad: "g",
+        },
       ]);
       setSelectedAlimento(null);
       setSearchQuery("");
@@ -135,23 +162,23 @@ const EditarRecetas: React.FC = () => {
     }
   };
 
-  // Actualizar receta (en lugar de crear)
+  // Actualizar receta
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const ingredientesPayload = ingredientes.map(ing => ({
-      nombre_alimento: ing.alimento.nombre_alimento,
-      cantidad: ing.gramos,
-      unidad: "g"  // o la unidad que corresponda
+    const ingredientesPayload = ingredientes.map((ing) => ({
+      nombre_alimento: ing.nombre_alimento,
+      cantidad: ing.cantidad,
+      unidad: ing.unidad,
     }));
 
     const recetaPayload = {
       nombre,
       descripcion,
       instrucciones,
-      tiempoPreparacion,
+      tiempo_preparacion: tiempoPreparacion, // Nota: asegúrate de que los nombres concuerden
       user_id,
-      ingredientes: ingredientesPayload
+      ingredientes: ingredientesPayload,
     };
 
     fetch(`http://localhost:4000/api/recetas/${id}`, { 
@@ -173,13 +200,13 @@ const EditarRecetas: React.FC = () => {
   };
 
   const overallCalories = ingredientes.reduce(
-    (acc, ing) => acc + ing.alimento.calorias * (ing.gramos / 100),
+    (acc, ing) => acc + ing.calorias * (ing.cantidad / 100),
     0
   );
 
   const overallNutrients = ingredientes.reduce((acc, ing) => {
-    ing.alimento.nutrientes.forEach((nutr) => {
-      const total = nutr.cantidad * (ing.gramos / 100);
+    (ing.nutrientes ?? []).forEach((nutr) => {
+      const total = nutr.cantidad * (ing.cantidad / 100);
       if (acc[nutr.nombre_nutriente]) {
         acc[nutr.nombre_nutriente] += total;
       } else {
@@ -265,7 +292,7 @@ const EditarRecetas: React.FC = () => {
                   <input
                     type="number"
                     placeholder="Gramos"
-                    value={gramosInput}
+                    value={gramosInput === null ? "" : gramosInput}
                     onChange={(e) =>
                       setGramosInput(e.target.value === "" ? "" : Number(e.target.value))
                     }
@@ -298,7 +325,7 @@ const EditarRecetas: React.FC = () => {
                 <ul className={styles.ingredientList}>
                   {ingredientes.map((ing, index) => (
                     <li key={index}>
-                      {ing.alimento.nombre_alimento} - {ing.gramos} g
+                      {ing.nombre_alimento} - {ing.cantidad} g
                       <button
                         type="button"
                         onClick={() =>
@@ -343,9 +370,9 @@ const EditarRecetas: React.FC = () => {
           </div>
           {ingredientes.map((ing, index) => (
             <div key={index} className={styles.ingredientStat}>
-              <h4>{ing.alimento.nombre_alimento}</h4>
+              <h4>{ing.nombre_alimento}</h4>
               <p>
-                {(ing.alimento.calorias * (ing.gramos / 100)).toFixed(2)} kcal
+                {(ing.calorias * (ing.cantidad / 100)).toFixed(2)} kcal
               </p>
               <button
                 type="button"
@@ -358,10 +385,10 @@ const EditarRecetas: React.FC = () => {
               </button>
               {expanded.includes(index) && (
                 <div className={styles.details}>
-                  {ing.alimento.nutrientes.map((nut, i) => (
+                  {(ing.nutrientes ?? []).map((nut, i) => (
                     <div key={i} className={styles.nutrientStat}>
                       <span>{nut.nombre_nutriente}:</span>
-                      <span>{(nut.cantidad * (ing.gramos / 100)).toFixed(2)} g</span>
+                      <span>{(nut.cantidad * (ing.cantidad / 100)).toFixed(2)} g</span>
                     </div>
                   ))}
                 </div>

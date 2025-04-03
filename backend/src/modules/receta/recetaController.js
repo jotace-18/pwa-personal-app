@@ -1,20 +1,28 @@
-import { addReceta, getAllRecetas, getRecetaById, deleteReceta as deleteRecetaService } from './recetaService.js';
+import { addReceta, getAllRecetas, getRecetaById, deleteReceta as deleteRecetaService, updateReceta as updateRecetaService } from './recetaService.js';
 
 export const createReceta = async (req, res) => {
   try {
     const { nombre, descripcion, instrucciones, tiempo_preparacion, user_id, ingredientes } = req.body;
-    const recetaData = {
-      nombre,
-      descripcion,
-      instrucciones,
-      tiempo_preparacion,
-      user_id,
-    };
+    const recetaData = { nombre, descripcion, instrucciones, tiempo_preparacion, user_id };
     const nuevaReceta = await addReceta(recetaData, ingredientes);
     res.status(201).json(nuevaReceta);
   } catch (error) {
     console.error("Error al crear la receta:", error);
     res.status(500).json({ message: "Error al crear la receta" });
+  }
+};
+
+// Función para actualizar receta
+export const updateReceta = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, descripcion, instrucciones, tiempo_preparacion, user_id, ingredientes } = req.body;
+    const recetaData = { nombre, descripcion, instrucciones, tiempo_preparacion, user_id };
+    const recetaActualizada = await updateRecetaService(id, recetaData, ingredientes);
+    res.json(recetaActualizada);
+  } catch (error) {
+    console.error("Error al actualizar la receta:", error);
+    res.status(500).json({ message: "Error al actualizar la receta" });
   }
 };
 
@@ -53,4 +61,4 @@ export const deleteReceta = async (req, res) => {
   }
 };
 
-export default { createReceta, getRecetas, deleteReceta };
+export default { createReceta, getRecetas, updateReceta, deleteReceta };

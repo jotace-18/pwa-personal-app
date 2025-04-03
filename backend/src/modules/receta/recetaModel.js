@@ -20,8 +20,8 @@ const Receta = sequelize.define('Receta', {
     allowNull: true,
   },
   tiempo_preparacion: {
-    type: DataTypes.STRING(50),
-    allowNull: true,
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   user_id: {
     type: DataTypes.INTEGER,
