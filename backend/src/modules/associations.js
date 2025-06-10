@@ -6,6 +6,7 @@ import Dieta from './dieta/dietaModel.js';
 import Usuario from './usuarios/usuarioModel.js';
 import Receta from './receta/recetaModel.js';
 import RecetaAlimento from './receta_alimento/receta_alimentoModel.js';
+import { DietaAlimento, DietaReceta } from './dieta_contenido/dietaContenidoModel.js';
 
 // Asociaciones de Alimentos con Nutrientes (muchos a muchos)
 Alimento.belongsToMany(Nutriente, { 
@@ -44,6 +45,16 @@ Alimento.belongsToMany(Receta, {
 Receta.belongsTo(Usuario, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 Usuario.hasMany(Receta, { foreignKey: 'user_id' });
 
+// DietaAlimento relaciones
+DietaAlimento.belongsTo(Dieta, { foreignKey: 'id_dieta' });
+DietaAlimento.belongsTo(Alimento, { foreignKey: 'id_alimento' });
+Dieta.hasMany(DietaAlimento, { foreignKey: 'id_dieta' });
+
+// DietaReceta relaciones
+DietaReceta.belongsTo(Dieta, { foreignKey: 'id_dieta' });
+DietaReceta.belongsTo(Receta, { foreignKey: 'id_receta' });
+Dieta.hasMany(DietaReceta, { foreignKey: 'id_dieta' });
+
 // Exporta los modelos con las asociaciones ya configuradas
 export {
   Alimento,
@@ -52,5 +63,7 @@ export {
   Dieta,
   Usuario,
   Receta,
-  RecetaAlimento
+  RecetaAlimento,
+  DietaAlimento,
+  DietaReceta,
 };

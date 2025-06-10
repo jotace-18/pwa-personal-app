@@ -9,16 +9,16 @@ import Resumen from "./Resumen";
 
 const EditDietaIndex: React.FC = () => {
   return (
-    <Routes>
-      {/* Por defecto redirige a Lunes */}
-      <Route path="/" element={<Navigate to="lunes" />} />
-      <Route path="lunes" element={<Lunes />} />
-      
-      <Route path="resumen" element={<Resumen />} />
-      {/* Opción fallback */}
-      <Route path="*" element={<Navigate to="resumen" />} />
-    </Routes>
+    <div>
+      <Routes>
+        <Route index element={<Navigate to="lunes" />} />
+        <Route path="lunes" element={<Lunes />} />
+        <Route path="resumen" element={<Resumen />} />
+        <Route path="*" element={<Navigate to="resumen" />} />
+      </Routes>
+    </div>
   );
 };
+
 
 export default EditDietaIndex;

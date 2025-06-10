@@ -1,265 +1,298 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "../../styles/pages_styles/EditDieta.module.css";
+
+interface Alimento {
+  id_alimento: number;
+  nombre_alimento: string;
+}
+
+interface Receta {
+  id_receta: number;
+  nombre: string;
+}
+
+type SeleccionItemTipo = "alimento" | "receta";
+
+interface SeleccionItem {
+  id: number;
+  nombre: string;
+  cantidad: number;
+  tipo: SeleccionItemTipo;
+}
+
+interface SeleccionComida {
+  alimentos: SeleccionItem[];
+  recetas: SeleccionItem[];
+}
+
+interface Estadisticas {
+  calorias: number;
+  nutrientes: Record<string, number>;
+}
+
+interface DietaContenido {
+  alimentos?: { id: number; nombre: string; cantidad: number }[];
+  recetas?: { id: number; nombre: string; cantidad: number }[];
+}
+
+interface AlimentoDetalle {
+  calorias: number;
+  nutrientes?: { nombre_nutriente: string; cantidad: number }[];
+}
+
+interface Ingrediente {
+  calorias: number;
+  nutrientes?: { nombre_nutriente: string; cantidad: number }[];
+}
+
+interface RecetaDetalle {
+  ingredientes?: Ingrediente[];
+}
+
+const COMIDAS = ["Desayuno 1", "Desayuno 2", "Almuerzo", "Merienda", "Cena"];
+const ID_DIETA = 1;
 
 const Lunes: React.FC = () => {
   const navigate = useNavigate();
+  const [alimentos, setAlimentos] = useState<Alimento[]>([]);
+  const [recetas, setRecetas] = useState<Receta[]>([]);
+  const [seleccion, setSeleccion] = useState<Record<string, SeleccionComida>>({});
+  const [estadisticas, setEstadisticas] = useState<Estadisticas>({ calorias: 0, nutrientes: {} });
 
-  // Estados para cada comida
-  const [desayuno1Foods, setDesayuno1Foods] = useState<string[]>([]);
-  const [inputDesayuno1, setInputDesayuno1] = useState("");
+  useEffect(() => {
+    const inicial: Record<string, SeleccionComida> = {};
+    COMIDAS.forEach((c) => {
+      inicial[c] = { alimentos: [], recetas: [] };
+    });
+    setSeleccion(inicial);
+  }, []);
 
-  const [desayuno2Foods, setDesayuno2Foods] = useState<string[]>([]);
-  const [inputDesayuno2, setInputDesayuno2] = useState("");
+  useEffect(() => {
+    fetch("/api/alimentos")
+      .then((res) => res.json())
+      .then((data: Alimento[]) => setAlimentos(data))
+      .catch(console.error);
 
-  const [almuerzoFoods, setAlmuerzoFoods] = useState<string[]>([]);
-  const [inputAlmuerzo, setInputAlmuerzo] = useState("");
+    fetch("/api/recetas")
+      .then((res) => res.json())
+      .then((data: Receta[]) => setRecetas(data))
+      .catch(console.error);
+  }, []);
 
-  const [meriendaFoods, setMeriendaFoods] = useState<string[]>([]);
-  const [inputMerienda, setInputMerienda] = useState("");
+  useEffect(() => {
+    COMIDAS.forEach((comida) => {
+      fetch(`/api/dieta-contenido/${ID_DIETA}/dia/Lunes/comida/${encodeURIComponent(comida)}`)
+        .then((res) => res.json())
+        .then((data: DietaContenido) => {
+          setSeleccion((prev) => ({
+            ...prev,
+            [comida]: {
+              alimentos: data.alimentos?.map((a) => ({
+                id: a.id,
+                nombre: a.nombre,
+                cantidad: a.cantidad,
+                tipo: "alimento",
+              })) || [],
+              recetas: data.recetas?.map((r) => ({
+                id: r.id,
+                nombre: r.nombre,
+                cantidad: r.cantidad,
+                tipo: "receta",
+              })) || [],
+            },
+          }));
+        })
+        .catch((error) => console.error(`Error al cargar ${comida}:`, error));
+    });
+  }, []);
 
-  const [cenaFoods, setCenaFoods] = useState<string[]>([]);
-  const [inputCena, setInputCena] = useState("");
+  useEffect(() => {
+    const calcular = async () => {
+      let totalCalorias = 0;
+      const totalNutrientes: Record<string, number> = {};
 
-  // Funciones para Desayuno 1
-  const addDesayuno1Food = () => {
-    if (inputDesayuno1.trim()) {
-      setDesayuno1Foods([...desayuno1Foods, inputDesayuno1.trim()]);
-      setInputDesayuno1("");
+      for (const comida of COMIDAS) {
+        const sel = seleccion[comida];
+        if (!sel) continue;
+
+        for (const item of sel.alimentos) {
+          try {
+            const res = await fetch(`/api/alimentos/${item.id}`);
+            if (!res.ok) continue;
+            const data: AlimentoDetalle = await res.json();
+            totalCalorias += data.calorias * item.cantidad;
+            data.nutrientes?.forEach((n) => {
+              totalNutrientes[n.nombre_nutriente] =
+                (totalNutrientes[n.nombre_nutriente] || 0) + n.cantidad * item.cantidad;
+            });
+          } catch (err) {
+            console.error("Error en alimento:", item, err);
+          }
+        }
+
+        for (const receta of sel.recetas) {
+          try {
+            const res = await fetch(`/api/recetas/${receta.id}`);
+            if (!res.ok) continue;
+            const data: RecetaDetalle = await res.json();
+            data.ingredientes?.forEach((ing) => {
+              totalCalorias += ing.calorias * receta.cantidad;
+              ing.nutrientes?.forEach((n) => {
+                totalNutrientes[n.nombre_nutriente] =
+                  (totalNutrientes[n.nombre_nutriente] || 0) + n.cantidad * receta.cantidad;
+              });
+            });
+          } catch (err) {
+            console.error("Error en receta:", receta, err);
+          }
+        }
+      }
+
+      setEstadisticas({ calorias: totalCalorias, nutrientes: totalNutrientes });
+    };
+
+    calcular();
+  }, [seleccion]);
+
+  const handleSeleccionar = (
+    comida: string,
+    tipo: SeleccionItemTipo,
+    item: { id: number; nombre: string }
+  ) => {
+    setSeleccion((prev) => {
+      const key = tipo === "alimento" ? "alimentos" : "recetas";
+      const yaExiste = prev[comida]?.[key].some((el) => el.id === item.id);
+      if (yaExiste) return prev;
+      const nuevo: SeleccionItem = { ...item, cantidad: 1, tipo };
+      return {
+        ...prev,
+        [comida]: {
+          ...prev[comida],
+          [key]: [...(prev[comida]?.[key] || []), nuevo],
+        },
+      };
+    });
+  };
+
+  const handleEliminar = (comida: string, tipo: SeleccionItemTipo, id: number) => {
+    const key = tipo === "alimento" ? "alimentos" : "recetas";
+    setSeleccion((prev) => ({
+      ...prev,
+      [comida]: {
+        ...prev[comida],
+        [key]: prev[comida][key].filter((i) => i.id !== id),
+      },
+    }));
+  };
+
+  const handleCantidad = (
+    comida: string,
+    tipo: SeleccionItemTipo,
+    id: number,
+    nuevaCantidad: number
+  ) => {
+    const key = tipo === "alimento" ? "alimentos" : "recetas";
+    setSeleccion((prev) => ({
+      ...prev,
+      [comida]: {
+        ...prev[comida],
+        [key]: prev[comida][key].map((i) =>
+          i.id === id ? { ...i, cantidad: nuevaCantidad } : i
+        ),
+      },
+    }));
+  };
+
+  const handleGuardar = async () => {
+    try {
+      for (const comida of COMIDAS) {
+        const sel = seleccion[comida];
+        if (!sel) continue;
+        await fetch(`/api/dieta-contenido/${ID_DIETA}/dia/Lunes/comida/${encodeURIComponent(comida)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            alimentos: sel.alimentos.map(({ id, cantidad }) => ({ id_alimento: id, cantidad })),
+            recetas: sel.recetas.map(({ id, cantidad }) => ({ id_receta: id, cantidad })),
+          }),
+        });
+      }
+      alert("Dieta del lunes guardada correctamente.");
+      navigate("/edit-dieta/resumen");
+    } catch (err) {
+      console.error(err);
+      alert("Error al guardar la dieta del lunes.");
     }
-  };
-  const removeDesayuno1Food = (index: number) => {
-    setDesayuno1Foods(desayuno1Foods.filter((_, i) => i !== index));
-  };
-
-  // Funciones para Desayuno 2
-  const addDesayuno2Food = () => {
-    if (inputDesayuno2.trim()) {
-      setDesayuno2Foods([...desayuno2Foods, inputDesayuno2.trim()]);
-      setInputDesayuno2("");
-    }
-  };
-  const removeDesayuno2Food = (index: number) => {
-    setDesayuno2Foods(desayuno2Foods.filter((_, i) => i !== index));
-  };
-
-  // Funciones para Almuerzo
-  const addAlmuerzoFood = () => {
-    if (inputAlmuerzo.trim()) {
-      setAlmuerzoFoods([...almuerzoFoods, inputAlmuerzo.trim()]);
-      setInputAlmuerzo("");
-    }
-  };
-  const removeAlmuerzoFood = (index: number) => {
-    setAlmuerzoFoods(almuerzoFoods.filter((_, i) => i !== index));
-  };
-
-  // Funciones para Merienda
-  const addMeriendaFood = () => {
-    if (inputMerienda.trim()) {
-      setMeriendaFoods([...meriendaFoods, inputMerienda.trim()]);
-      setInputMerienda("");
-    }
-  };
-  const removeMeriendaFood = (index: number) => {
-    setMeriendaFoods(meriendaFoods.filter((_, i) => i !== index));
-  };
-
-  // Funciones para Cena
-  const addCenaFood = () => {
-    if (inputCena.trim()) {
-      setCenaFoods([...cenaFoods, inputCena.trim()]);
-      setInputCena("");
-    }
-  };
-  const removeCenaFood = (index: number) => {
-    setCenaFoods(cenaFoods.filter((_, i) => i !== index));
   };
 
   return (
-    <div className={styles.editDietaContainer}>
-      <h1>Editar Dieta - Lunes</h1>
-      <div className={styles.twoColumns}>
-        {/* Columna izquierda: Formulario */}
-        <div className={styles.formContainer}>
-          <section className={styles.formSection}>
-            <h2>Datos Alimenticios</h2>
+    <div style={{ padding: "2rem" }}>
+      <h1>Dieta del Lunes</h1>
 
-            {/* Desayuno 1 */}
-            <div className={styles.formGroup}>
-              <label htmlFor="desayuno1">Desayuno 1:</label>
-              <div className={styles.mealInputContainer} style={{ flexDirection: "column", alignItems: "stretch" }}>
-                <input
-                  type="text"
-                  id="desayuno1"
-                  value={inputDesayuno1}
-                  onChange={(e) => setInputDesayuno1(e.target.value)}
-                  placeholder="Ej.: Tostada"
-                />
-              </div>
-              <button type="button" onClick={addDesayuno1Food}>
-                Añadir alimento
-              </button>
-              <ul className={styles.mealList}>
-                {desayuno1Foods.map((food, index) => (
-                  <li key={index}>
-                    {food}{" "}
-                    <button type="button" onClick={() => removeDesayuno1Food(index)}>
-                      X
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+      <h3>Estadísticas Totales</h3>
+      <p><strong>Calorías:</strong> {estadisticas.calorias.toFixed(2)} kcal</p>
+      {Object.entries(estadisticas.nutrientes).map(([nombre, total]) => (
+        <p key={nombre}><strong>{nombre}:</strong> {total.toFixed(2)}</p>
+      ))}
 
-            {/* Desayuno 2 */}
-            <div className={styles.formGroup}>
-              <label htmlFor="desayuno2">Desayuno 2:</label>
-              <div className={styles.mealInputContainer} style={{ flexDirection: "column", alignItems: "stretch" }}>
-                <input
-                  type="text"
-                  id="desayuno2"
-                  value={inputDesayuno2}
-                  onChange={(e) => setInputDesayuno2(e.target.value)}
-                  placeholder="Ej.: Café"
-                />
-              </div>
-              <button type="button" onClick={addDesayuno2Food}>
-                Añadir alimento
-              </button>
-              <ul className={styles.mealList}>
-                {desayuno2Foods.map((food, index) => (
-                  <li key={index}>
-                    {food}{" "}
-                    <button type="button" onClick={() => removeDesayuno2Food(index)}>
-                      X
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+      {COMIDAS.map((comida) => (
+        <div key={comida} style={{ marginBottom: "2rem" }}>
+          <h2>{comida}</h2>
 
-            {/* Almuerzo */}
-            <div className={styles.formGroup}>
-              <label htmlFor="almuerzo">Almuerzo:</label>
-              <div className={styles.mealInputContainer} style={{ flexDirection: "column", alignItems: "stretch" }}>
-                <input
-                  type="text"
-                  id="almuerzo"
-                  value={inputAlmuerzo}
-                  onChange={(e) => setInputAlmuerzo(e.target.value)}
-                  placeholder="Ej.: Pollo"
-                />
-              </div>
-              <button type="button" onClick={addAlmuerzoFood}>
-                Añadir alimento
-              </button>
-              <ul className={styles.mealList}>
-                {almuerzoFoods.map((food, index) => (
-                  <li key={index}>
-                    {food}{" "}
-                    <button type="button" onClick={() => removeAlmuerzoFood(index)}>
-                      X
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <select onChange={(e) => {
+            const id = Number(e.target.value);
+            const alimento = alimentos.find((a) => a.id_alimento === id);
+            if (alimento) {
+              handleSeleccionar(comida, "alimento", {
+                id: alimento.id_alimento,
+                nombre: alimento.nombre_alimento,
+              });
+            }
+          }}>
+            <option value="">-- Añadir alimento --</option>
+            {alimentos.map((a) => (
+              <option key={a.id_alimento} value={a.id_alimento}>
+                {a.nombre_alimento}
+              </option>
+            ))}
+          </select>
 
-            {/* Merienda */}
-            <div className={styles.formGroup}>
-              <label htmlFor="merienda">Merienda:</label>
-              <div className={styles.mealInputContainer} style={{ flexDirection: "column", alignItems: "stretch" }}>
-                <input
-                  type="text"
-                  id="merienda"
-                  value={inputMerienda}
-                  onChange={(e) => setInputMerienda(e.target.value)}
-                  placeholder="Ej.: Fruta"
-                />
-              </div>
-              <button type="button" onClick={addMeriendaFood}>
-                Añadir alimento
-              </button>
-              <ul className={styles.mealList}>
-                {meriendaFoods.map((food, index) => (
-                  <li key={index}>
-                    {food}{" "}
-                    <button type="button" onClick={() => removeMeriendaFood(index)}>
-                      X
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <select onChange={(e) => {
+            const id = Number(e.target.value);
+            const receta = recetas.find((r) => r.id_receta === id);
+            if (receta) {
+              handleSeleccionar(comida, "receta", {
+                id: receta.id_receta,
+                nombre: receta.nombre,
+              });
+            }
+          }}>
+            <option value="">-- Añadir receta --</option>
+            {recetas.map((r) => (
+              <option key={r.id_receta} value={r.id_receta}>
+                {r.nombre}
+              </option>
+            ))}
+          </select>
 
-            {/* Cena */}
-            <div className={styles.formGroup}>
-              <label htmlFor="cena">Cena:</label>
-              <div className={styles.mealInputContainer} style={{ flexDirection: "column", alignItems: "stretch" }}>
+          <ul>
+            {[...(seleccion[comida]?.alimentos || []), ...(seleccion[comida]?.recetas || [])].map((item) => (
+              <li key={`${item.tipo}-${item.id}`}>
+                {item.nombre} -{" "}
                 <input
-                  type="text"
-                  id="cena"
-                  value={inputCena}
-                  onChange={(e) => setInputCena(e.target.value)}
-                  placeholder="Ej.: Ensalada"
-                />
-              </div>
-              <button type="button" onClick={addCenaFood}>
-                Añadir alimento
-              </button>
-              <ul className={styles.mealList}>
-                {cenaFoods.map((food, index) => (
-                  <li key={index}>
-                    {food}{" "}
-                    <button type="button" onClick={() => removeCenaFood(index)}>
-                      X
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
+                  type="number"
+                  value={item.cantidad}
+                  min={1}
+                  onChange={(e) => handleCantidad(comida, item.tipo, item.id, Number(e.target.value))}
+                />{" "}
+                <button onClick={() => handleEliminar(comida, item.tipo, item.id)}>Eliminar</button>
+              </li>
+            ))}
+          </ul>
         </div>
+      ))}
 
-        {/* Columna derecha: Estadísticas y botones */}
-        <div className={styles.sideContainer}>
-          <section className={styles.statsSection}>
-            <h2>Estadísticas del Día</h2>
-            <div className={styles.statsItem}>
-              <span className={styles.statLabel}>Calorías Totales:</span>
-              <span className={styles.statValue}>2000 kcal</span>
-            </div>
-            <div className={styles.statsItem}>
-              <span className={styles.statLabel}>Proteínas:</span>
-              <span className={styles.statValue}>150 g</span>
-            </div>
-            <div className={styles.statsItem}>
-              <span className={styles.statLabel}>Carbohidratos:</span>
-              <span className={styles.statValue}>250 g</span>
-            </div>
-            <div className={styles.statsItem}>
-              <span className={styles.statLabel}>Grasas:</span>
-              <span className={styles.statValue}>70 g</span>
-            </div>
-          </section>
-
-          <section className={styles.navigationButtons}>
-            <button
-              className={styles.btnPrev}
-              onClick={() => navigate("/edit-dieta/resumen")}
-            >
-              Descartar
-            </button>
-            <button
-              className={styles.btnNext}
-              onClick={() => navigate("/edit-dieta/resumen")}
-            >
-              Guardar
-            </button>
-          </section>
-        </div>
-      </div>
+      <button onClick={handleGuardar}>Guardar</button>
     </div>
   );
 };

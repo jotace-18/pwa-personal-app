@@ -71,3 +71,19 @@ export const getAlimentoByNameService = async (nombreAlimento) => {
     throw error;
   }
 };
+export const getNutrientesByAlimentoId = async (id_alimento) => {
+  try {
+    const nutrientes = await AlimentoNutriente.findAll({
+      where: { id_alimento },
+      include: [{ model: Nutriente, attributes: ['nombre_nutriente', 'unidad'] }],
+    });
+
+    return nutrientes.map((n) => ({
+      nombre_nutriente: n.Nutriente.nombre_nutriente,
+      cantidad: Number(n.cantidad),
+      unidad: n.Nutriente.unidad,
+    }));
+  } catch (error) {
+    throw error;
+  }
+};

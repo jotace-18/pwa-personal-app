@@ -61,3 +61,48 @@ export const getAlimentoByName = async (req, res) => {
     return res.status(500).json({ message: 'Error al obtener el alimento' });
   }
 };
+
+import { getNutrientesByAlimentoId } from './alimentosService.js';
+
+export const getNutrientesByAlimento = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const nutrientes = await getNutrientesByAlimentoId(id);
+    res.json(nutrientes);
+  } catch (error) {
+    console.error("Error al obtener nutrientes del alimento:", error);
+    res.status(500).json({ message: "Error al obtener los nutrientes" });
+  }
+};
+
+
+export const getAlimentoById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const alimento = await Alimento.findByPk(id, {
+      include: [
+        {
+          model: Nutriente,
+          attributes: ['nombre_nutriente'],
+          through: { attributes: ['cantidad'] },
+        },
+      ],
+    });
+
+    if (!alimento) {
+      return res.status(404).json({ message: 'Alimento no encontrado' });
+    }
+
+    res.json({
+      calorias: alimento.calorias,
+      nutrientes: alimento.Nutrientes?.map(n => ({
+        nombre_nutriente: n.nombre_nutriente,
+        cantidad: Number(n.AlimentoNutriente.cantidad),
+      })) || [],
+    });
+  } catch (error) {
+    console.error("Error al obtener alimento por ID:", error);
+    res.status(500).json({ message: "Error interno" });
+  }
+};
+
