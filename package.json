@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "dotenv": "^16.4.7",
+    "joi": "^17.13.3",
     "pg": "^8.14.1",
     "sequelize": "^6.37.6"
   }
